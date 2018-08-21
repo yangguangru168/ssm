@@ -8,4 +8,8 @@
   <select id="insertData"  parameterType="com.hand.entity.Film">
     insert into film (title,description,language_id) values (#{title},#{description},#{languageId})
   </select>
+
+  <select id="selectTitle" parameterType="String" resultType="com.hand.entity.Film">
+    select title from film where title = #{title}
+  </select>
 </mapper>

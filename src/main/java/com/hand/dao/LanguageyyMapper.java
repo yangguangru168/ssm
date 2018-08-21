@@ -11,4 +11,7 @@ public interface LanguageyyMapper {
 
     /*添加*/
     Film insertData(Film film);
+
+    /*检查是否存在title*/
+    Film selectTitle(String name);
 }

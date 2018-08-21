@@ -1,12 +1,15 @@
 package com.hand.entity;
 
+import javax.validation.constraints.Pattern;
 import java.util.List;
 
 public class Film {
     private Integer filmId;
 
+    @Pattern(regexp = "(^[a-zA-Z0-9_-]{3,16}$)|(^[\\u2E80-\\u9FFF]{2,5}$)",message = "中文2-5，字符3-6")
     private String title;
 
+    @Pattern(regexp = "(^[\\u2E80-\\u9FFF]{6,100}$)",message = "110《中文》6")
     private String description;
 
     private Integer languageId;

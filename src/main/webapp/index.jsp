@@ -48,19 +48,22 @@
                     <label class="col-sm-2 control-label">标题</label>
                     <div class="col-sm-6">
                         <input type="text"  name="title" class="form-control" id="title_input" placeholder="请输入标题">
+                        <span class="help-block"></span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">描述</label>
                     <div class="col-sm-6">
                         <input type="text" name="description" class="form-control" id="description_input" placeholder="请输入描述">
+                        <span class="help-block"></span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">语言</label>
                     <div class="col-sm-6">
-                        <select class="form-control" name="languageId" id="slct">
+                        <select class="form-control" name="languageId" id="langId">
                         </select>
+                        <span class="help-block"></span>
                     </div>
                 </div>
             </form>
@@ -213,8 +216,9 @@
             nav.appendTo("#page_info_nav");
         }
 
-        /*新增按钮*/
+        /*新增按钮,以及每次打开重置表单*/
         $("#add_film_modal").click(function () {
+            clean("#filmModal form");
             getLanguage();
             $('#filmModal').modal({
                 backdrop: "static"
@@ -237,23 +241,110 @@
             var list = result.map.lge;
            $.each(list,function (index,item) {
                var option = $("<option></option>").append(this.languagel).attr("value",this.languageId);
-               option.appendTo("#slct");
+               option.appendTo("#langId");
            })
+        }
+
+        /*校验表单的方法*/
+        function show_form_varify(id,status,msg) {
+            $(id).parent().removeClass("has-success has-error");
+            $(id).next("span").text(" ");
+            if("success"==status){
+                $(id).parent().addClass("has-success");
+                $(id).next("span").text(msg);
+            }else {
+                $(id).parent().addClass("has-error");
+                $(id).next("span").text(msg);
+            }
+        }
+        /*form表单校验*/
+        function form_verify(){
+            /*title*/
+            var titleName = $("#title_input").val();
+            var regTilteName =/(^[a-zA-Z0-9_-]{3,16}$)|(^[\u2E80-\u9FFF]{2,5}$)/;
+            if(!regTilteName.test(titleName)){
+                show_form_varify("#title_input","error","2-5为中文和3-16字符");
+                return false;
+            }else {
+                show_form_varify("#title_input","success","");
+            }
+            /*descripton*/
+                var dec = $("#description_input").val();
+                var regDec = /(^[\u2E80-\u9FFF]{6,100}$)/;
+                if(!regDec.test(dec)){
+                    show_form_varify("#description_input","error","中文6-100字符");
+                    return false;
+                }else {
+                    show_form_varify("#description_input","success","");
+                }
+            /*lang*/
+            var lg = $("#langId").val();
+            if (lg>6){
+                return false;
+            }else {
+                show_form_varify("#langId","success","");
+            }
+            return true;
         }
 
         /*点击确认保存数据*/
         $("#affirm_data").click(function () {
-            alert($("#filmModal form").serialize());
+            if (!form_verify()){
+                return false;
+            }
+            /*保存之前判断title是否可用，ture则可以保存*/
+            if($(this).attr("check_value")=="fail"){
+                return false;
+            }
             $.ajax({
                 url:"${APP_PASH}/add",
                 type:"POST",
                 data:$("#filmModal form").serialize(),
                 success:function (result) {
-                    $("#filmModal").modal('hide');
-                    to_page(totalAll);
+                    /*后端也校验*/
+                    if (result.code==100){
+                        $("#filmModal").modal('hide');
+                        to_page(totalAll);
+                    } else {
+                        if(result.map.fieldErrors.title != undefined){
+                            show_form_varify("#title_input","error",result.map.fieldErrors.title);
+                        }
+                        else if (result.map.fieldErrors.description != undefined){
+                            show_form_varify("#description_input","error",result.map.fieldErrors.description);
+                        }
+                    }
+
                 }
             })
-        })
+        });
+
+        /*验证title是否已经存在*/
+        $("#title_input").blur(function () {
+            var te = this.value;
+            $.ajax({
+                url:"${APP_PASH}/checkTitle",
+                type:"get",
+                data:"name="+te,
+                success:function (result) {
+                    if(result.code==100){
+                        show_form_varify("#title_input","success","title可用");
+                        /*如果可用给确认按钮添加属性*/
+                        $("#affirm_data").attr("check_value","success");
+                    }else {
+                        console.log(result.map.check_msg);
+                        show_form_varify("#title_input","error",result.map.check_msg);
+                        $("#affirm_data").attr("check_value","fail");
+                    }
+                }
+            })
+        });
+
+        /*点击新增清除所有样式*/
+        function clean(ele) {
+            $(ele)[0].reset();
+            $(ele).find("*").removeClass("has-success has-error");
+            $(ele).find(".help-block").text(" ")
+        }
 
     </script>
 </html>

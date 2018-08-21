@@ -22,4 +22,10 @@ public class LanguageServiceImpl implements LanguageService {
     public void insert(Film film) {
         languageyyMapper.insertData(film);
     }
+
+    @Override
+    public int  checkTite(String name) {
+        Film film = languageyyMapper.selectTitle(name);
+        return film !=null ? 0:1;
+    }
 }
