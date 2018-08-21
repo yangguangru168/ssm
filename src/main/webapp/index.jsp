@@ -8,7 +8,6 @@
 <title>index.js</title>
 <%
     pageContext.setAttribute("APP_PASH",request.getContextPath());
-    System.out.println("地址地址"+request.getContextPath());
 %>
 <script type="text/javascript" src="static/js/jquery-1.12.4.min.js"></script>
 <link href="${APP_PASH}/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -34,8 +33,42 @@
     </div>
 </nav>
 
-
-    <%--新增按钮--%>
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="updateTile">更新信息</h4>
+            </div>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">标题</label>
+                    <p class="form-control-static" id="updata_title"></p>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">描述</label>
+                    <div class="col-sm-6">
+                        <input type="text" name="description" class="form-control" id="description_update_input" placeholder="请输入描述">
+                        <span class="help-block"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">语言</label>
+                    <div class="col-sm-6">
+                        <select class="form-control" name="languageId" id="updatelangId">
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="update_btn">更新</button>
+            </div>
+        </div>
+    </div>
+</div>
+    <%--新增form--%>
 <div class="modal fade" id="filmModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -122,7 +155,7 @@
 </body>
     <script type="text/javascript">
 
-        var totalAll;
+        var totalAll,current;
         /*ajax请求*/
         $(function () {
             to_page(1);
@@ -151,9 +184,11 @@
                 var filmTitle = $("<td></td>").append(item.title);
                 var filmDescription = $("<td></td>").append(item.description);
                 var filmLanguageId = $("<td></td>").append(item.languageyy.languagel);
-                var editTD = $("<button></button>").addClass("btn btn-primary btn-sm")
+                var editTD = $("<button></button>").addClass("btn btn-primary btn-sm edit_btn")
                     .append($("<span></span>").addClass("glyphicon glyphicon-pencil").append("编辑"));
-               var deleteTD = $("<button></button>").addClass("btn btn-danger btn-sm")
+                /*为每一个编辑按钮添加edit_id*/
+                editTD.attr("edit_id",item.filmId);
+               var deleteTD = $("<button></button>").addClass("btn btn-danger btn-sm delete_btn")
                    .append($("<span></span>").addClass("glyphicon glyphicon-trash").append("删除"));
                 var ediDelete = $("<td></td>").append(editTD).append("  ").append(deleteTD);
                 $("<tr></tr>").append(filmIdTD).append(filmTitle).append(filmDescription).
@@ -167,6 +202,7 @@
             ("当前"+result.map.pageInfo.pageNum+"页"+","+
                 "总共"+result.map.pageInfo.pages+"有页"+","+"有"+result.map.pageInfo.total+"条记录");
              totalAll= result.map.pageInfo.total;
+             current=result.map.pageInfo.pageNum;
         }
         /*分页导航栏*/
         function pageInfo_nav(result) {
@@ -216,33 +252,29 @@
             nav.appendTo("#page_info_nav");
         }
 
-        /*新增按钮,以及每次打开重置表单*/
+        /*新增弹出form,以及每次打开重置表单*/
         $("#add_film_modal").click(function () {
             clean("#filmModal form");
-            getLanguage();
+            getLanguage("#langId");
             $('#filmModal').modal({
                 backdrop: "static"
             })
         });
-        /*点击新增重新发送ajax请求*/
-        function getLanguage() {
+        /*获取language的全部值，并填充到选择列表里面*/
+        function getLanguage(ele) {
+            $(ele).empty();
             $.ajax({
                 url:"${APP_PASH}/language",
                 type:"post",
                 success:function (result) {
-                    languageList(result);
+                    /*每次获取之前先清空*/
+                    var list = result.map.lge;
+                    $.each(list,function (index,item) {
+                        var option = $("<option></option>").append(this.languagel).attr("value",this.languageId);
+                        option.appendTo(ele);
+                    })
                 }
             })
-        }
-        /*获取language的全部值，并填充到列表里面*/
-        function languageList(result) {
-            /*每次获取之前先清空*/
-            $("#filmModal select").empty();
-            var list = result.map.lge;
-           $.each(list,function (index,item) {
-               var option = $("<option></option>").append(this.languagel).attr("value",this.languageId);
-               option.appendTo("#langId");
-           })
         }
 
         /*校验表单的方法*/
@@ -345,6 +377,50 @@
             $(ele).find("*").removeClass("has-success has-error");
             $(ele).find(".help-block").text(" ")
         }
+        /*根据id查询film数据*/
+        function selcetFilm(id){
+            $.ajax({
+                url:"${APP_PASH}/edit/"+id,
+                type:"GET",
+                success:function (result) {
+                    $("#updata_title").text(result.map.selectFilm.title);
+                    $("#description_update_input").val(result.map.selectFilm.description);
+                    $("#updatelangId").val(result.map.selectFilm.languageId)
+                }
+            })
+        }
+        /*点击编辑按钮*/
+        $(document).on("click",".edit_btn",function () {
+            selcetFilm($(this).attr("edit_id"));
+            getLanguage("#updatelangId");
+            /*添加edit_id添加到按钮*/
+            $("#update_btn").attr("edit_id",$(this).attr("edit_id"))
+            $('#updateModal').modal({
+                backdrop: "static"
+            })
+        });
+        /*点击更新按钮*/
+        $("#update_btn").click(function () {
+            /*校验*/
+            var dec = $("#description_update_input").val();
+            var regDec = /(^[\u2E80-\u9FFF]{6,100}$)/;
+            if(!regDec.test(dec)){
+                show_form_varify("#description_update_input","error","中文6-100字符");
+                return false;
+            }else {
+                show_form_varify("#description_update_input","success","");
+            }
+            /*ajax请求*/
+            $.ajax({
+                url:"${APP_PASH}/update/"+$(this).attr("edit_id"),
+                type:"PUT",
+                data: $("#updateModal form").serialize(),
+                success:function (result) {
+                    $("#updateModal").modal('hide');
+                        to_page(current);
+                }
+            })
+        })
 
     </script>
 </html>

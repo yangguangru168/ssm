@@ -28,10 +28,6 @@ public class ShowController {
     public Msg getFilmPage(@RequestParam Integer pn, Model model){
         PageHelper.startPage(pn,5);
         List<Film> films = filmService.selectAlls();
-        for (Film list:
-             films) {
-            System.out.println("数据"+list);
-        }
         PageInfo page = new PageInfo(films,5);
         System.out.println(page);
         return Msg.success().add("pageInfo",page);

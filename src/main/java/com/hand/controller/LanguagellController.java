@@ -62,4 +62,21 @@ public class LanguagellController {
             return Msg.fail().add("check_msg","title不可用");
         }
     }
+    /*根据id获取当前的数据*/
+    @ResponseBody
+    @RequestMapping(value = "/edit/{id}",method = RequestMethod.GET)
+    public Msg getFilm(@PathVariable(value = "id") Integer id){
+        System.out.println(id);
+        Film film = languageService.selectFilmData(id);
+        return Msg.success().add("selectFilm",film);
+    }
+
+    /*编辑*/
+    @ResponseBody
+    @RequestMapping(value = "/update/{filmId}",method = RequestMethod.PUT)
+    public Msg saveData(Film film){
+        System.out.println(film);
+        languageService.updateData(film);
+        return  Msg.success();
+    }
 }

@@ -14,4 +14,10 @@ public interface LanguageyyMapper {
 
     /*检查是否存在title*/
     Film selectTitle(String name);
+
+    /*根据Id查询film数据*/
+    Film selectFilm(Integer id);
+
+    /*编辑*/
+    void updateData(Film film);
 }

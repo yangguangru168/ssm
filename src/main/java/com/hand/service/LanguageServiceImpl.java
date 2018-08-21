@@ -28,4 +28,15 @@ public class LanguageServiceImpl implements LanguageService {
         Film film = languageyyMapper.selectTitle(name);
         return film !=null ? 0:1;
     }
+
+    @Override
+    public Film selectFilmData(Integer id) {
+        Film film = languageyyMapper.selectFilm(id);
+        return film;
+    }
+
+    @Override
+    public void updateData(Film film) {
+        languageyyMapper.updateData(film);
+    }
 }

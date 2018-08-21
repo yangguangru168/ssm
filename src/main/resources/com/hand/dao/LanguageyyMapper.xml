@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hand.dao.LanguageyyMapper">
+
+  <sql id="filmList">
+      film_id as filmId,title as title,description as description,language_Id as languageId
+  </sql>
+
   <select id="selectLgAlls" resultType="com.hand.entity.Languageyy">
     select language_id as languageId ,languagel as languagel from languagell
   </select>
@@ -11,5 +16,14 @@
 
   <select id="selectTitle" parameterType="String" resultType="com.hand.entity.Film">
     select title from film where title = #{title}
+  </select>
+
+  <select id="selectFilm" parameterType="Integer" resultType="com.hand.entity.Film">
+      select <include refid="filmList"/> from film where film_id = #{film_id}
+  </select>
+
+  <select id="updateData" parameterType="com.hand.entity.Film">
+      update film set description =#{description},language_id = #{languageId} where
+      film_id = #{filmId}
   </select>
 </mapper>
