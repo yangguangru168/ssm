@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.dao.LanguageyyMapper">
+  <select id="selectLgAlls" resultType="com.hand.entity.Languageyy">
+    select language_id as languageId ,languagel as languagel from languagell
+  </select>
+
+  <select id="insertData"  parameterType="com.hand.entity.Film">
+    insert into film (title,description,language_id) values (#{title},#{description},#{languageId})
+  </select>
+</mapper>

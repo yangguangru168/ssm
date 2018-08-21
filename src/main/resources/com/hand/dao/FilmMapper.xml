@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.dao.FilmMapper">
+  <sql id="selectParameter">
+    film_id as filmId,title as title,description as description,language_Id as languageId
+  </sql>
+
+  <sql id="selectAlls">
+    film_id as filmId,title as title,description as description,f.language_Id as languageId,
+    languagel as languagel
+  </sql>
+
+  <select id="selectAll" resultType="com.hand.entity.Film" parameterType="int">
+    select <include refid="selectParameter"/> from film where film_id = #{film_id}
+  </select>
+
+  <select id="selectAlls" resultType="com.hand.entity.Film" parameterType="String">
+    select <include refid="selectParameter"/> from film where title like #{title}
+  </select>
+
+  <select id="delete" parameterType="int">
+    delete from film where film_id = #{film_id};
+  </select>
+
+ <!-- 联表查询
+  <select id="selectFilmAlls" resultType="com.hand.entity.Film">
+    select <include refid="selectAlls"/> from film f left join languagell g on f.language_Id = g.language_Id
+  </select>-->
+  <resultMap type="com.hand.entity.Film" id="getfilmAlls">
+        <id column="film_id" property="filmId"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="language_id" property="languageId"/>
+    <association  property="languageyy" javaType="com.hand.entity.Languageyy" >
+        <id column="language_id" property="languageId"/>
+        <result column="languagel" property="languagel"/>
+    </association >
+  </resultMap>
+        <select id="selectFilmAlls" resultMap="getfilmAlls">
+          select * from film f left join languagell g on f.language_Id = g.language_Id
+        </select>
+</mapper>
