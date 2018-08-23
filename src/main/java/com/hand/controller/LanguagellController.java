@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class LanguagellController {
     @RequestMapping("/language")
     @ResponseBody
     public Msg getLangguage(){
+        System.out.println("检测");
         List<Languageyy> list = languageService.selectLgAll();
         return Msg.success().add("lge",list);
     }
@@ -78,5 +80,26 @@ public class LanguagellController {
         System.out.println(film);
         languageService.updateData(film);
         return  Msg.success();
+    }
+
+    /*删除*/
+    @RequestMapping(value = "/delete/{ids}" , method = RequestMethod.DELETE)
+    @ResponseBody
+    public Msg deleteData(@PathVariable("ids") String ids){
+        System.out.println("多"+ids);
+        List<Integer> ls = new ArrayList<Integer>();
+        if(ids.contains("-")){
+            String[] idList = ids.split("-");
+            for (String str: idList) {
+                ls.add(Integer.valueOf(str));
+            }
+            languageService.deleteListData(ls);
+            return Msg.success();
+        }else {
+            System.out.println("delete"+ids);
+            Integer id = Integer.valueOf(ids);
+            languageService.deleteByFilmId(id);
+            return Msg.success();
+        }
     }
 }

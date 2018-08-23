@@ -121,7 +121,7 @@
     <div class="row">
         <div class="col-md-4 col-md-offset-8">
             <button class="btn btn-primary" id="add_film_modal">增加</button>
-            <button class="btn btn-danger">删除</button>
+            <button class="btn btn-danger" id="delete_alls_btn">删除</button>
         </div>
     </div>
     <%--列表--%>
@@ -130,6 +130,7 @@
             <table class="table table-bordered" id="film_table">
                 <thead>
                     <tr>
+                        <td><input type="checkbox" class="check_alls"></td>
                         <th>film_id</th>
                         <th>标题</th>
                         <th>描述</th>
@@ -165,7 +166,7 @@
             $.ajax({
                 url:"${APP_PASH}/film",
                 data:"pn="+pn,
-                type:"post",
+                type:"get",
                 success:function (result) {
                     film_table(result);
                     page_info(result);
@@ -180,6 +181,7 @@
 
             var film_list = result.map.pageInfo.list;
             $.each(film_list,function (index,item) {
+                var checkBoxTD = $("<td> <input type='checkbox' class='checkbox_id'/></td>")
                 var filmIdTD = $("<td></td>").append(item.filmId);
                 var filmTitle = $("<td></td>").append(item.title);
                 var filmDescription = $("<td></td>").append(item.description);
@@ -190,8 +192,9 @@
                 editTD.attr("edit_id",item.filmId);
                var deleteTD = $("<button></button>").addClass("btn btn-danger btn-sm delete_btn")
                    .append($("<span></span>").addClass("glyphicon glyphicon-trash").append("删除"));
+               deleteTD.attr("delete_id",item.filmId);
                 var ediDelete = $("<td></td>").append(editTD).append("  ").append(deleteTD);
-                $("<tr></tr>").append(filmIdTD).append(filmTitle).append(filmDescription).
+                $("<tr></tr>").append(checkBoxTD).append(filmIdTD).append(filmTitle).append(filmDescription).
                 append(filmLanguageId).append(ediDelete).appendTo("#film_table tbody");
             })
         }
@@ -203,7 +206,7 @@
                 "总共"+result.map.pageInfo.pages+"有页"+","+"有"+result.map.pageInfo.total+"条记录");
              totalAll= result.map.pageInfo.total;
              current=result.map.pageInfo.pageNum;
-        }
+        };
         /*分页导航栏*/
         function pageInfo_nav(result) {
             $("#page_info_nav").empty();
@@ -250,7 +253,7 @@
             ul.append(endPage).append(pageLast);
             var nav = $("<nav></nav>").append(ul);
             nav.appendTo("#page_info_nav");
-        }
+        };
 
         /*新增弹出form,以及每次打开重置表单*/
         $("#add_film_modal").click(function () {
@@ -260,6 +263,7 @@
                 backdrop: "static"
             })
         });
+
         /*获取language的全部值，并填充到选择列表里面*/
         function getLanguage(ele) {
             $(ele).empty();
@@ -420,7 +424,61 @@
                         to_page(current);
                 }
             })
+        });
+
+        /*点击删除按钮*/
+        $(document).on("click",".delete_btn",function () {
+            /*先获取当前行第二列的数据并是否要删除，是否删除*/
+            var titleName = $(this).parents("tr").find("td").eq(2).text();
+            var  filmId= $(this).attr("delete_id");
+            if(confirm(titleName)){
+                $.ajax({
+                    url:"${APP_PASH}/delete/"+filmId,
+                    type:"DELETE",
+                    success:function (result) {
+                        to_page(current);
+                    }
+                })
+            }
+
         })
 
+        /*复选框选中所有事件*/
+        $(".check_alls").click(function () {
+            /*点击全部选中,子checkBox也全部选中*/
+            $(".checkbox_id").prop("checked",$(".check_alls").prop("checked"));
+        });
+        /*当子checkBox全部选中时，父的checkBox也全部选中*/
+        $(document).on("click",".checkbox_id",function () {
+            /*选中的checkBox数量等于总的chekBox数量*/
+            var flag = $(".checkbox_id:checked").length== $(".checkbox_id").length;
+            $(".check_alls").prop("checked",flag);
+        });
+
+        /*点击全部删除按钮删除选中的多条数据*/
+        $("#delete_alls_btn").click(function () {
+            var check_list = $(".checkbox_id:checked");
+            var checkName = "";
+            var delete_id = "";
+            /*遍历cehckBox上对应的值*/
+            $.each(check_list,function () {
+                checkName += $(this).parents("tr").find("td").eq(2).text()+",";
+                delete_id += $(this).parents("tr").find("td").eq(1).text()+"-";
+            });
+            /*去除多余的逗号*/
+            var checkName_list = checkName.substring(0,checkName.length-1);
+            var delete_id_list = delete_id.substring(0,delete_id.length-1);
+            /*如果确认发送ajax请求*/
+            if(confirm(checkName_list)){
+                $.ajax({
+                    url:"${APP_PASH}/delete/"+delete_id_list,
+                    type:"DELETE",
+                    success:function (result) {
+                        to_page(current);
+                    }
+                })
+
+            }
+        })
     </script>
 </html>

@@ -20,6 +20,16 @@
         <property name="prefix" value="/WEB-INF/views/"></property>
         <property name="suffix" value=".jsp"></property>
     </bean>
-
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/index.jsp"/>
+            <mvc:mapping path="/language"/>
+            <mvc:mapping path="/add"/>
+            <mvc:exclude-mapping path="/login.html"/>
+            <!--排除拦截-->
+            <mvc:exclude-mapping path="/user/userLogin" />
+            <bean class="com.hand.utils.CommonInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
 
 </beans>

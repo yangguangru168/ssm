@@ -20,4 +20,10 @@ public interface LanguageyyMapper {
 
     /*编辑*/
     void updateData(Film film);
+
+    /*删除*/
+    void deleteData(Integer id);
+
+    /*批量删除*/
+    void deleteListData(List<Integer> list);
 }

@@ -26,4 +26,9 @@
       update film set description =#{description},language_id = #{languageId} where
       film_id = #{filmId}
   </select>
+
+    <select id="deleteData" parameterType="Integer">
+        delete from film where film_id = #{filmId}
+    </select>
+
 </mapper>

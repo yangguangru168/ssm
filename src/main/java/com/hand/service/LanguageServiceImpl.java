@@ -39,4 +39,16 @@ public class LanguageServiceImpl implements LanguageService {
     public void updateData(Film film) {
         languageyyMapper.updateData(film);
     }
+
+    @Override
+    public void deleteByFilmId(Integer id) {
+        languageyyMapper.deleteData(id);
+    }
+
+    @Override
+    public void deleteListData(List<Integer> ids) {
+        for (Integer id : ids){
+            languageyyMapper.deleteData(id);
+        }
+    }
 }

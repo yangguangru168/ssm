@@ -16,4 +16,9 @@ public interface LanguageService {
     Film selectFilmData(Integer id);
     /*更新*/
     void updateData(Film film);
+    /*删除*/
+    void deleteByFilmId(Integer id);
+
+    /*批量删除*/
+    void deleteListData(List<Integer> ids);
 }
